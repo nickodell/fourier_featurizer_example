@@ -2,7 +2,7 @@
 
 This repo demonstrates how to use Fourier terms as exogenous regressors in an ARIMA model to capture seasonality, without necessarily having 24 months of data.
 
-This is demonstrated using Denver daily temperature measurements, as this
+This is demonstrated using Denver monthly temperature measurements, as this
 data is easy to get and has strong seasonality.
 
 ## What is a Fourier feature?
