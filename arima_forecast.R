@@ -3,7 +3,8 @@ library(lubridate)
 
 # How many sine and cosine terms should be created?
 # Results in 2*K extra exogenous terms
-# Must be less than 2 / M
+# Must be less than 2 / M - if k = 2 / M, it is
+# equivalent to normal 
 K <- 1
 
 # Period of seasonality
@@ -79,12 +80,15 @@ for (entry in list(
          col = c("blue", "black"), lty = 1, lwd = 2, bty = "n")
 }
 
-plot(all_times, xreg_all[, 1], type = "o", col = "darkorange", pch = 19, lwd = 0.8,
+colors <- palette.colors(ncol(xreg_all), palette = "tableau10")
+plot(all_times, xreg_all[, 1], type = "o", col = colors[1], pch = 19, lwd = 0.8,
      ylim = range(xreg_all), main = sprintf("Fourier Exogenous Features (K=%d, m=%d)", K, M),
      ylab = "Value", xlab = "Date")
-lines(all_times, xreg_all[, 2], type = "o", col = "purple", pch = 19, lwd = 0.8)
+for (i in seq(2, ncol(xreg_all))) {
+  lines(all_times, xreg_all[, i], type = "o", col = colors[i], pch = 19, lwd = 0.8)
+}
 abline(v = test_df$month[1], col = "gray", lty = 2)
 legend("topright", legend = colnames(xreg_all),
-       col = c("darkorange", "purple"), lty = 1, pch = 19, bty = "n")
+       col = colors, lty = 1, pch = 19, bty = "n")
 
 mtext("Denver Temperature — ARIMA Forecast vs Actual (Monthly)", outer = TRUE, cex = 1.2)

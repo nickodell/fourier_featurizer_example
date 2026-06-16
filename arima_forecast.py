@@ -5,6 +5,9 @@ import pmdarima as pm
 from pmdarima.pipeline import Pipeline
 from pmdarima.preprocessing import FourierFeaturizer
 
+K = 2
+M = 12
+
 df = pd.read_csv("denver_temperature.csv", parse_dates=["time"])
 
 train = df.iloc[:12]
@@ -17,7 +20,7 @@ print(f"Test:  {test['time'].min().date()} to {test['time'].max().date()} ({len(
 def fit_and_predict(train, test, use_fourier):
     steps = []
     if use_fourier:
-        steps.append(("fourier", FourierFeaturizer(m=12, k=1)))
+        steps.append(("fourier", FourierFeaturizer(m=M, k=K)))
     steps.append(("arima", pm.AutoARIMA(seasonal=False, stepwise=True)))
 
     pipe = Pipeline(steps)
@@ -44,7 +47,7 @@ fig, axes = plt.subplots(3, 1, figsize=(12, 11), sharex=True)
 
 for ax, forecast, conf_int, title in [
     (axes[0], forecast_plain, ci_plain, f"Without Fourier — ARIMA{order_plain}"),
-    (axes[1], forecast_fourier, ci_fourier, f"With Fourier (k=1, m=12) — ARIMA{order_fourier}"),
+    (axes[1], forecast_fourier, ci_fourier, f"With Fourier (k={K}, m={M}) — ARIMA{order_fourier}"),
 ]:
     ax.plot(train["time"], train["temp"], color="steelblue", marker="o", linewidth=0.8, label="Train")
     ax.plot(test["time"], test["temp"], color="black", marker="o", linewidth=1.2, label="Actual")
@@ -55,10 +58,11 @@ for ax, forecast, conf_int, title in [
     ax.set_ylabel("Temperature (°C)")
     ax.legend()
 
-for col, color in zip(exog_all.columns, ["darkorange", "purple"]):
+colors = plt.cm.tab10.colors
+for col, color in zip(exog_all.columns, colors):
     axes[2].plot(all_times, exog_all[col], marker="o", linewidth=0.8, color=color, label=col)
 axes[2].axvline(test["time"].iloc[0], color="gray", linestyle="--", linewidth=0.8)
-axes[2].set_title("Fourier Exogenous Features (k=1, m=12)")
+axes[2].set_title(f"Fourier Exogenous Features (k={K}, m={M})")
 axes[2].set_ylabel("Value")
 axes[2].set_xlabel("Date")
 axes[2].legend()
