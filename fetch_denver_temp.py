@@ -16,10 +16,6 @@ df = df[["time", "temp"]]
 df = df.sort_values("time").set_index("time")
 df = df["temp"].resample("MS").mean().reset_index()
 
-# Drop the current partial month, then keep the last 14 complete months
-today = pd.Timestamp.today().normalize()
-current_month_start = today.replace(day=1)
-df = df[df["time"] < current_month_start]
 df = df.tail(14).reset_index(drop=True)
 
 df.to_csv("denver_temperature.csv", index=False)
