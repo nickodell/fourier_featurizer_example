@@ -1,0 +1,5 @@
+.venv/
+*.csv
+*.sublime-workspace
+__pycache__/
+*.pyc
