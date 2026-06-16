@@ -3,8 +3,7 @@ library(lubridate)
 
 # How many sine and cosine terms should be created?
 # Results in 2*K extra exogenous terms
-# Must be less than 2 / M - if k = 2 / M, it is
-# equivalent to normal 
+# Must be less than 2 / M
 K <- 1
 
 # Period of seasonality
