@@ -65,5 +65,4 @@ axes[2].legend()
 
 fig.suptitle("Denver Temperature — ARIMA Forecast vs Actual (Monthly)", y=1.01)
 fig.tight_layout()
-plt.savefig("arima_forecast.png", dpi=150)
 plt.show()

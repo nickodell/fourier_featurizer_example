@@ -50,7 +50,7 @@ fmt_order <- function(fit) {
 xreg_all  <- rbind(fourier(ts_train, K = 1), fourier(ts_train, K = 1, h = nrow(test_df)))
 all_times <- df$month
 
-png("arima_forecast.png", width = 1200, height = 1100, res = 100)
+
 par(mfrow = c(3, 1), mar = c(3, 4, 3, 1), oma = c(2, 0, 2, 0))
 
 vline_x <- start_test[1] + (start_test[2] - 1) / 12
@@ -77,6 +77,3 @@ legend("topright", legend = colnames(xreg_all),
        col = c("darkorange", "purple"), lty = 1, pch = 19, bty = "n")
 
 mtext("Denver Temperature — ARIMA Forecast vs Actual (Monthly)", outer = TRUE, cex = 1.2)
-dev.off()
-
-cat("\nSaved arima_forecast.png\n")
