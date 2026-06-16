@@ -1,6 +1,17 @@
 library(forecast)
 library(lubridate)
 
+# How many sine and cosine terms should be created?
+# Results in 2*K extra exogenous terms
+# Must be less than 2 / M
+K <- 1
+
+# Period of seasonality
+M <- 12
+
+# Monthly dataset of Denver temperature from the past 14 months.
+# I used this dataset because it has strong seasonality.
+# Data is from fetch_denver_temp.py.
 df <- read.csv("denver_temperature.csv")
 df$month <- as.Date(df$time)
 df$time  <- NULL
@@ -9,10 +20,10 @@ train_df <- head(df, 12)
 test_df  <- tail(df, 2)
 
 start_train <- c(year(train_df$month[1]), month(train_df$month[1]))
-ts_train    <- ts(train_df$temp, frequency = 12, start = start_train)
+ts_train    <- ts(train_df$temp, frequency = M, start = start_train)
 
 start_test <- c(year(test_df$month[1]), month(test_df$month[1]))
-ts_test    <- ts(test_df$temp, frequency = 12, start = start_test)
+ts_test    <- ts(test_df$temp, frequency = M, start = start_test)
 
 cat(sprintf("Train: %s to %s (%d months)\n",
   train_df$month[1], tail(train_df$month, 1), nrow(train_df)))
@@ -22,8 +33,8 @@ cat(sprintf("Test:  %s to %s (%d months)\n",
 
 fit_and_forecast <- function(ts_train, use_fourier, h) {
   if (use_fourier) {
-    xreg_train <- fourier(ts_train, K = 1)
-    xreg_test  <- fourier(ts_train, K = 1, h = h)
+    xreg_train <- fourier(ts_train, K = K)
+    xreg_test  <- fourier(ts_train, K = K, h = h)
     fit <- auto.arima(ts_train, xreg = xreg_train, seasonal = FALSE)
     fc  <- forecast(fit, xreg = xreg_test, h = h)
   } else {
@@ -47,17 +58,17 @@ fmt_order <- function(fit) {
 }
 
 # Fourier features for full date range (train + test)
-xreg_all  <- rbind(fourier(ts_train, K = 1), fourier(ts_train, K = 1, h = nrow(test_df)))
+xreg_all  <- rbind(fourier(ts_train, K = K), fourier(ts_train, K = K, h = nrow(test_df)))
 all_times <- df$month
 
 
 par(mfrow = c(3, 1), mar = c(3, 4, 3, 1), oma = c(2, 0, 2, 0))
 
-vline_x <- start_test[1] + (start_test[2] - 1) / 12
+vline_x <- start_test[1] + (start_test[2] - 1) / M
 
 for (entry in list(
   list(result = result_plain,   label = "Without Fourier"),
-  list(result = result_fourier, label = "With Fourier (K=1, m=12)")
+  list(result = result_fourier, label = sprintf("With Fourier (K=%d, m=%d)", K, M))
 )) {
   fc    <- entry$result$fc
   title <- sprintf("%s — %s", entry$label, fmt_order(entry$result$fit))
@@ -69,7 +80,7 @@ for (entry in list(
 }
 
 plot(all_times, xreg_all[, 1], type = "o", col = "darkorange", pch = 19, lwd = 0.8,
-     ylim = range(xreg_all), main = "Fourier Exogenous Features (K=1, m=12)",
+     ylim = range(xreg_all), main = sprintf("Fourier Exogenous Features (K=%d, m=%d)", K, M),
      ylab = "Value", xlab = "Date")
 lines(all_times, xreg_all[, 2], type = "o", col = "purple", pch = 19, lwd = 0.8)
 abline(v = test_df$month[1], col = "gray", lty = 2)
